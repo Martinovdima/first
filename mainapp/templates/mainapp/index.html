@@ -1,0 +1,22 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+        {% block menu %}
+            {% include 'mainapp/include/inc_menu.html' %}
+        {% endblock %}
+        {% block content %}
+           <div class="link_content">
+               <div class="link_icon">
+                   <a href="/calculation/"><img src="{% static 'img/calc.png' %}" alt="Запись"></a>
+                </div>
+               <div class="link_icon">
+                   <a href="/view/"><img src="{% static 'img/view.png' %}" alt="Просмотр"></a>
+               </div>
+               <div class="link_icon">
+                   <a href="/auto/"><img src="{% static 'img/auto_2.png' %}" alt="Авто"></a>
+               </div>
+               <div class="link_icon">
+                   <a href="/instruction/"><img src="{% static 'img/instr.png' %}" alt="Инструкция"></a>
+               </div>
+           </div>
+        {% endblock %}
+

@@ -1,0 +1,79 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+{% block menu %}
+       {% include 'mainapp/include/inc_menu.html' %}
+{% endblock %}
+{% block content %}
+
+        <div class="forma">
+        <form method="POST" action="create/">
+            {% csrf_token %}
+            <p>
+                <div class="field">
+                <label>Имя</label>
+                <select name="name">
+                    {% for n, k in package_name %}
+                    <option>{{ k }}</option>
+                    {% endfor %}
+                </select>
+                </div>
+                <div class="field">
+                <label>Дата</label>
+                <input type="date" name="pub_date" required placeholder="Дата">
+                </div>
+                <div class="field">
+                <label>Категория</label>
+                <select name="category">
+                    {% for n, k in package_category %}
+                    <option>{{ k }}</option>
+                    {% endfor %}
+                </select>
+                </div>
+                <div class="field">
+                <label>Высота взлива</label>
+                <input type="number" name="height"  required placeholder="00000">
+                </div>
+                <div class="field">
+                <label>Вода</label>
+                <input type="number" name="water" required placeholder="00000">
+                </div>
+                <div class="field">
+                <label>Плотность верх</label>
+                <input type="number" name="density_3" step="any" required placeholder="000,0">
+                </div>
+                <div class="field">
+                <label>Плотность середина</label>
+                <input type="number" name="density_2" step="any" required placeholder="000,0">
+                </div>
+                <div class="field">
+                <label>Плотность низ</label>
+                <input type="number" name="density_1" step="any" required placeholder="000,0">
+                </div>
+                <div class="field">
+                <label>Температура верх</label>
+                <input type="number" name="temperature_3" step="any" required placeholder="-00,0">
+                </div>
+                <div class="field">
+                <label>Температура середина</label>
+                <input type="number" name="temperature_2" step="any" required placeholder="-00,0">
+                </div>
+                <div class="field">
+                <label>Температура низ</label>
+                <input type="number" name="temperature_1" step="any" required placeholder="-00,0">
+                </div>
+                <input type="submit" value="Создать">
+                <input type="reset" value="Очистить">
+            </p>
+        </form>
+        </div>
+
+        <div class="clearfix">
+        </div>
+            <div class="measurements">
+                <h2></h2>
+            </div>
+
+        <div class="clearfix">
+        </div>
+
+{% endblock %}
