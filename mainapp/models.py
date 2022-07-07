@@ -39,34 +39,12 @@ class Package(models.Model):
     density_3 = models.FloatField(verbose_name='плотность верх', default=0)
     water = models.IntegerField(verbose_name='подтоварная вода', default=0)
     calculations = models.FloatField(verbose_name='расчетный объем', default=0)
+    update = models.DateTimeField(null=True, auto_now=True, verbose_name="Дата обновления")
+    write_date = models.DateTimeField(null=True, auto_now=True, verbose_name="Дата внесения записи")
 
     def __init__(self, *args, **kwargs):
         super(Package, self).__init__(*args, **kwargs)
 
-
-    #def __add__(self, other):
-        #return Package(self.temperature_2 + other.temperature_2, self.temperature_1 + other.temperature_1,
-                       #self.temperature_3 + other.temperature_3, self.temperature_1 + other.temperature_2,
-                       #self.temperature_1 + other.temperature_3, self.temperature_2 + other.temperature_1,
-                       #self.temperature_2 + other.temperature_3, self.temperature_3 + other.temperature_1,
-                       #self.temperature_3 + other.temperature_2), (self.density_1 + other.density_1,
-                       #self.density_2 + other.density_2, self.density_3 + other.density_3,
-                       #self.density_3 + other.density_3, self.density_1 + other.density_2,
-                       #self.density_1 + other.density_3, self.density_2 + other.density_1,
-                       #self.density_2 + other.density_3, self.density_3 + other.density_1)
-
-
-    #def __floordiv__(self, other):
-        #return Package(self.water // other.water, self.height // other.height)
-
-    #def __mod__(self, other):
-        #return Package(self.water % other.water, self.height % other.height)
-
-    #def __int__(self):
-        #return int(self.water), int(self.height)
-
-    #def __float__(self):
-        #return float(self.calculations), float(self.temperature_1), float(self.temperature_2), float(self.temperature_3), float(self.density_1), float(self.density_2), float(self.density_3)
 
     @property
     def mass_65(self):
@@ -313,11 +291,7 @@ class Package(models.Model):
         return f'{self.name}'
 
 
-class Sort_data(models.Model):
-    sort_data = models.DateField('дата отбора', default=date.today)
 
-    def __str__(self):
-        return f'{self.sort_data}'
 
 class Alarm(models.Model):
     MESSAGE_CHOICES = (

@@ -6,14 +6,16 @@
 {% block content %}
 <div class="result">
         <div class="forma">
-            <form method="POST" action="sort/">
+            <form method="POST" action=" ">
                 {% csrf_token %}
-                <label>Дата</label>
-                    <div class="field">
-                    <input type="date" name="sort_data" required placeholder="Дата">
-                    </div>
+                    <label>Дата</label>
+                    <select name="pub_date">
+                        {% for i in date_list %}
+                            <option>{{ i }}</option>
+                        {% endfor %}
+                    </select>
                     <input type="submit" value="Показать">
-                    </form>
+            </form>
         </div>
                 <div class="clearfix">
                 </div>
@@ -54,13 +56,9 @@
                                 </tr>
                             {% endfor %}
                     </table>
-                    <p> Итого в резервуарах: {{ all_calc_date }}</p>
+                    <p> Итого в резервуарах: {{ summa_obj }}</p>
 
             <div class="clearfix">
             </div>
-            <form method="POST" action="print/">
-                {% csrf_token %}
-                <input type="submit" value="Печать">
-            </form>
         </div>
 {% endblock %}

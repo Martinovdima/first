@@ -1,18 +1,15 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseNotFound
 from django.urls import reverse
-from mainapp.models import Package, Sort_data, Alarm
+from mainapp.models import Package, Alarm
 from datetime import date
 
 
-
-
-def main (request):
+def main(request):
     links_menu = [
         {'href': 'main', 'name': 'Главная'},
         {'href': 'calculation', 'name': 'Запись'},
         {'href': 'view', 'name': 'Просмотр'},
-        {'href': 'auto', 'name': 'Авто'},
         {'href': 'instruction', 'name': 'Инструкция'},
 
     ]
@@ -23,13 +20,11 @@ def main (request):
     return render(request, 'mainapp/index.html', content)
 
 
-
 def calculation(request):
     links_menu = [
         {'href': 'main', 'name': 'Главная'},
         {'href': 'calculation', 'name': 'Запись'},
         {'href': 'view', 'name': 'Просмотр'},
-        {'href': 'auto', 'name': 'Авто'},
         {'href': 'instruction', 'name': 'Инструкция'},
 
     ]
@@ -45,54 +40,25 @@ def calculation(request):
         {'name': 'Резервуар №67'},
     ]
     almes = Alarm.objects.last()
-    packages = Package.objects.all()
     package_name = Package.NAME_CHOICES
     package_category = Package.CATEGORY_CHOICES
-    uniq_date =[]
-    for p in packages:
-        if p.pub_date not in uniq_date:
-            uniq_date.append(p.pub_date)
-    all_calc_date = 0
-    user_date = date.today()
-    for package in packages:
-        if package.pub_date == user_date:
-            all_calc_date += package.calculations
-
 
     content = {
         'links_menu': links_menu,
         'links_form': links_form,
         'title': 'расчет',
-        'packages': packages,
         'package_name': package_name,
         'package_category': package_category,
-        'all_calc_date': all_calc_date,
-        'uniq_date': uniq_date,
         'almes': almes
-        }
+    }
     return render(request, 'mainapp/calculation.html', content)
 
-def auto (request):
+
+def instruction(request):
     links_menu = [
         {'href': 'main', 'name': 'Главная'},
         {'href': 'calculation', 'name': 'Запись'},
         {'href': 'view', 'name': 'Просмотр'},
-        {'href': 'auto', 'name': 'Авто'},
-        {'href': 'instruction', 'name': 'Инструкция'},
-
-    ]
-    content = {
-        'links_menu': links_menu,
-        'title': 'авто'
-    }
-    return render(request, 'mainapp/auto.html', content)
-
-def instruction (request):
-    links_menu = [
-        {'href': 'main', 'name': 'Главная'},
-        {'href': 'calculation', 'name': 'Запись'},
-        {'href': 'view', 'name': 'Просмотр'},
-        {'href': 'auto', 'name': 'Авто'},
         {'href': 'instruction', 'name': 'Инструкция'},
 
     ]
@@ -102,27 +68,52 @@ def instruction (request):
     }
     return render(request, 'mainapp/instruction.html', content)
 
-def view (request):
-    packages = Package.objects.all()
-    uniq_obj = []
-    uniq_date = []
-    for p in packages:
-        if p.pub_date not in uniq_date:
-            uniq_date.append(p.pub_date)
-            uniq_obj.append(p)
 
-    all_calc_date = 0
-    sort_list = []
-    sorting = Sort_data.objects.all()
-    sort_data_now = ''
-    for s_l_n in sorting:
-        sort_data_now = s_l_n.sort_data
-    packages = Package.objects.all()
-    for package in packages:
-        if package.pub_date == sort_data_now:
-            sort_list.append(package)
-            all_calc_date += package.calculations
+def view(request):
+    def str_for_datetime(s):
+        import datetime
 
+        out = []
+        month = {
+            'Jan.': '01',
+            'Feb.': '02',
+            'March': '03',
+            'April': '04',
+            'May': '05',
+            'June': '06',
+            'July': '07',
+            'Aug.': '08',
+            'Sept.': '09',
+            'Oct.': '10',
+            'Nov.': '11',
+            'Dec.': '12'
+        }
+        date = s.split(",")
+        year = date[1].strip()
+        day_month = date[0].split(' ')
+        out.append(year)
+        out.append(month[day_month[0]])
+        out.append(day_month[1])
+        out = '/'.join(out)
+        result = datetime.datetime.strptime(out, '%Y/%m/%d')
+        return result
+
+    date_set = {package.pub_date for package in Package.objects.all()}
+    date_list = (list(date_set))
+    date_list.sort(reverse=True)
+    date_list.insert(0, '')
+    if request.method == 'POST':
+        sort_for_date = request.POST.get('pub_date')
+        if sort_for_date == date_list[0]:
+            return HttpResponseRedirect(reverse("view"))
+        view_sort_for_date = str_for_datetime(sort_for_date)
+    else:
+        view_sort_for_date = date_list[1]
+
+    sort_list = [obj for obj in Package.objects.filter(pub_date=view_sort_for_date)]
+    summa_obj = 0
+    for item in sort_list:
+        summa_obj += item.calculations
     links_menu = [
         {'href': 'main', 'name': 'Главная'},
         {'href': 'calculation', 'name': 'Запись'},
@@ -134,15 +125,14 @@ def view (request):
     content = {
         'links_menu': links_menu,
         'title': 'просмотр',
-        'uniq_date': uniq_date,
-        "uniq_obj": uniq_obj,
-        'sort_list': sort_list,
-        'all_calc_date': all_calc_date,
-        'sort_data_now': sort_data_now
+        'summa_obj': summa_obj,
+        'date_list': date_list,
+        'sort_list': sort_list
     }
     return render(request, 'mainapp/view.html', content)
 
-def create (request):
+
+def create(request):
     if request.method == "POST":
         tom = Package()
         tom.name = request.POST.get("name")
@@ -161,51 +151,58 @@ def create (request):
                 tom.calculations = tom.calc(tom.mass_65)
                 tom.save()
             else:
-                return HttpResponseNotFound("<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 8700 мм.)</h2>")
+                return HttpResponseNotFound(
+                    "<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 8700 мм.)</h2>")
         elif tom.name == 'Резервуар 66':
             if int(tom.height) < 11900:
                 tom.calculations = tom.calc(tom.mass_66)
                 tom.save()
             else:
-                return HttpResponseNotFound("<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 11900 мм.)</h2>")
+                return HttpResponseNotFound(
+                    "<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 11900 мм.)</h2>")
         elif tom.name == 'Резервуар 67':
             if int(tom.height) < 11900:
                 tom.calculations = tom.calc(tom.mass_67)
                 tom.save()
             else:
-                return HttpResponseNotFound("<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 11900 мм.)</h2>")
+                return HttpResponseNotFound(
+                    "<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 11900 мм.)</h2>")
         elif tom.name == 'Резервуар 5':
             if int(tom.height) < 3210:
                 tom.calculations = tom.calc_h(tom.mass_5)
                 tom.save()
             else:
-                return HttpResponseNotFound("<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 3210 мм.)</h2>")
+                return HttpResponseNotFound(
+                    "<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 3210 мм.)</h2>")
         elif tom.name == 'Резервуар 6':
             if int(tom.height) < 3210:
                 tom.calculations = tom.calc_h(tom.mass_6)
                 tom.save()
             else:
-                return HttpResponseNotFound("<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 3210 мм.)</h2>")
+                return HttpResponseNotFound(
+                    "<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 3210 мм.)</h2>")
         elif tom.name == 'Резервуар 7':
-            if tom.height <'2710':
+            if tom.height < '2710':
                 tom.calculations = tom.calc_7(tom.mass_7)
                 tom.save()
             else:
-                return HttpResponseNotFound("<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 2710 мм.)</h2>")
+                return HttpResponseNotFound(
+                    "<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 2710 мм.)</h2>")
         elif tom.name == 'Резервуар 8':
             if int(tom.height) < 2760:
                 tom.calculations = tom.calc_h(tom.mass_8)
                 tom.save()
             else:
-                return HttpResponseNotFound("<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 2760 мм.)</h2>")
+                return HttpResponseNotFound(
+                    "<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 2760 мм.)</h2>")
         elif tom.name == 'Резервуар Д':
             if int(tom.height) < 1450:
                 tom.calculations = tom.calc_h(tom.mass_d)
                 tom.save()
             else:
-                return HttpResponseNotFound("<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 1450 мм.)</h2>")
+                return HttpResponseNotFound(
+                    "<h2>Ошибка записи, проверьте правильность ввода. (максимальный взлив 1450 мм.)</h2>")
     return HttpResponseRedirect(reverse('calculation'))
-
 
 
 def delete(request, id):
@@ -215,14 +212,3 @@ def delete(request, id):
         return HttpResponseRedirect(reverse("view"))
     except Package.DoesNotExist:
         return HttpResponseNotFound("<h2>Object not found</h2>")
-
-
-def sort(request):
-    if request.method == "POST":
-        sort_data = Sort_data()
-        sort_data.sort_data = request.POST.get("sort_data")
-        sort_data.save()
-    return HttpResponseRedirect(reverse("view"))
-
-def print(request):
-    return render(request, 'mainapp/print.html')
